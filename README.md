@@ -12,11 +12,13 @@ Polliniza é uma extensão livre para preparar uma enquete e adaptar suas versõ
 - adapta quantidade e tamanho das opções por rede;
 - mostra uma prévia antes de qualquer ação;
 - copia o conteúdo e abre o compositor da rede escolhida;
-- funciona sem servidor, conta própria ou chave de IA.
+- funciona sem servidor, conta própria ou chave de IA;
 - oferece a interface completa em português brasileiro e inglês;
 - preserva a escolha de idioma e o rascunho apenas no navegador.
 
 ## Instalação local
+
+Baixe o pacote pronto [polliniza-v0.1.0.zip](packages/polliniza-v0.1.0.zip), descompacte-o e carregue a pasta no navegador.
 
 ```bash
 npm run check
@@ -30,7 +32,7 @@ No Firefox, abra `about:debugging#/runtime/this-firefox`, escolha **Carregar ext
 
 | Modo | Significado |
 |---|---|
-| API oficial | A plataforma autoriza publicação programática. Ainda não habilitado nesta alfa. |
+| API oficial | A plataforma autoriza publicação programática. Ainda não habilitado nesta versão. |
 | Assistida | Polliniza prepara o conteúdo e abre a rede para conclusão pelo usuário. |
 | Copiar e colar | Polliniza adapta e copia o texto; a enquete é montada manualmente. |
 
