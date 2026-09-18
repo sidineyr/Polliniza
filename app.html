@@ -5,25 +5,25 @@
   <meta name="color-scheme" content="light dark"><title>Polliniza</title><link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header class="topbar"><div class="brand"><span class="logo" aria-hidden="true">?</span><div><strong>Polliniza</strong><small>Crie uma vez. Publique com controle.</small></div></div><button id="newPoll" class="ghost">Nova enquete</button></header>
+  <header class="topbar"><div class="brand"><span class="logo" aria-hidden="true">?</span><div><strong>Polliniza</strong><small data-i18n="tagline">Crie uma vez. Publique com controle.</small></div></div><div class="header-actions"><label for="language" class="sr-only" data-i18n="language">Idioma</label><select id="language" aria-label="Idioma"><option value="pt-BR">PT</option><option value="en">EN</option></select><button id="newPoll" class="ghost" data-i18n="newPoll">Nova enquete</button></div></header>
   <main class="layout">
     <section class="panel editor" aria-labelledby="create-title">
-      <p class="eyebrow">Estúdio de enquetes</p><h1 id="create-title">Qual pergunta merece viajar?</h1>
-      <label for="instruction">Instrução simples</label>
-      <textarea id="instruction" rows="3" placeholder="Ex.: Pergunte qual projeto educacional desperta mais curiosidade: Horizonte, QV, Chemical ou Einstein Física."></textarea>
-      <button id="interpret" class="secondary">Transformar em enquete</button>
-      <div class="divider"><span>revise os detalhes</span></div>
-      <label for="question">Pergunta</label><input id="question" maxlength="300" placeholder="O que você quer descobrir?"><small id="questionCount" class="counter">0/300</small>
-      <fieldset><legend>Opções</legend><div id="options"></div><button id="addOption" class="ghost" type="button">+ Adicionar opção</button></fieldset>
-      <label for="caption">Legenda</label><textarea id="caption" rows="3" maxlength="1000" placeholder="Um convite breve para participar"></textarea>
-      <div class="row"><label>Duração <select id="duration"><option value="1">1 dia</option><option value="3">3 dias</option><option value="7" selected>7 dias</option><option value="14">14 dias</option></select></label><label>Hashtags <input id="hashtags" placeholder="#educação #tecnologia"></label></div>
-      <fieldset><legend>Redes</legend><div id="networks" class="network-grid"></div></fieldset>
-      <div class="actions"><button id="save" class="secondary">Salvar rascunho</button><button id="prepare" class="primary">Preparar publicação</button></div>
+      <p class="eyebrow" data-i18n="studio">Estúdio de enquetes</p><h1 id="create-title" data-i18n="headline">Qual pergunta merece viajar?</h1>
+      <label for="instruction" data-i18n="instruction">Instrução simples</label>
+      <textarea id="instruction" rows="3" data-i18n-placeholder="instructionPlaceholder" placeholder="Ex.: Pergunte qual projeto educacional desperta mais curiosidade: Horizonte, QV, Chemical ou Einstein Física."></textarea>
+      <button id="interpret" class="secondary" data-i18n="transform">Transformar em enquete</button>
+      <div class="divider"><span data-i18n="review">revise os detalhes</span></div>
+      <label for="question" data-i18n="question">Pergunta</label><input id="question" maxlength="300" data-i18n-placeholder="questionPlaceholder" placeholder="O que você quer descobrir?"><small id="questionCount" class="counter">0/300</small>
+      <fieldset><legend data-i18n="options">Opções</legend><div id="options"></div><button id="addOption" class="ghost" type="button" data-i18n="addOption">+ Adicionar opção</button></fieldset>
+      <label for="caption" data-i18n="caption">Legenda</label><textarea id="caption" rows="3" maxlength="1000" data-i18n-placeholder="captionPlaceholder" placeholder="Um convite breve para participar"></textarea>
+      <div class="row"><label><span data-i18n="duration">Duração</span> <select id="duration"><option value="1" data-i18n="oneDay">1 dia</option><option value="3" data-i18n="threeDays">3 dias</option><option value="7" selected data-i18n="sevenDays">7 dias</option><option value="14" data-i18n="fourteenDays">14 dias</option></select></label><label><span data-i18n="hashtags">Hashtags</span> <input id="hashtags" placeholder="#educação #tecnologia"></label></div>
+      <fieldset><legend data-i18n="networks">Redes</legend><div id="networks" class="network-grid"></div></fieldset>
+      <div class="actions"><button id="save" class="secondary" data-i18n="save">Salvar rascunho</button><button id="prepare" class="primary" data-i18n="prepare">Preparar publicação</button></div>
       <p id="status" role="status" aria-live="polite"></p>
     </section>
-    <aside class="panel preview" aria-labelledby="preview-title"><p class="eyebrow">Prévia por rede</p><h2 id="preview-title">Antes de publicar, confira tudo.</h2><div id="previews" class="cards"><p class="empty">Selecione redes e prepare a publicação.</p></div></aside>
+    <aside class="panel preview" aria-labelledby="preview-title"><p class="eyebrow" data-i18n="preview">Prévia por rede</p><h2 id="preview-title" data-i18n="previewTitle">Antes de publicar, confira tudo.</h2><div id="previews" class="cards"><p class="empty" data-i18n="emptyPreview">Selecione redes e prepare a publicação.</p></div></aside>
   </main>
-  <template id="optionTemplate"><div class="option-row"><input class="option-input" maxlength="80" aria-label="Opção da enquete"><button class="remove" type="button" aria-label="Remover opção">×</button></div></template>
+  <template id="optionTemplate"><div class="option-row"><input class="option-input" maxlength="120" aria-label="Opção da enquete"><button class="remove" type="button" aria-label="Remover opção">×</button></div></template>
   <script type="module" src="app.js"></script>
 </body>
 </html>

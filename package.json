@@ -1,6 +1,6 @@
 {
   "name": "polliniza",
-  "version": "0.1.0-alpha.0",
+  "version": "0.1.0",
   "private": true,
   "description": "Crie uma enquete uma vez e publique em várias redes sociais.",
   "type": "module",

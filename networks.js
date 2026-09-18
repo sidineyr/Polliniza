@@ -14,19 +14,22 @@ export const NETWORKS = {
 export function adaptPoll(poll, network) {
   const cap = NETWORKS[network];
   if (!cap) throw new Error('Rede desconhecida');
-  const options = poll.options.slice(0, cap.maxOptions).map(value => value.slice(0, cap.optionLimit));
-  const tags = poll.hashtags.filter(Boolean).map(tag => tag.startsWith('#') ? tag : `#${tag}`).join(' ');
-  return { ...poll, options, network, capability: cap, shareText: [poll.caption, poll.question, options.map((v,i)=>`${i+1}. ${v}`).join('\n'), tags].filter(Boolean).join('\n\n') };
+  const options = (poll.options || []).slice(0, cap.maxOptions).map(value => String(value).slice(0, cap.optionLimit));
+  const tags = [...new Set((poll.hashtags || []).filter(Boolean).map(tag => tag.startsWith('#') ? tag : `#${tag}`))].join(' ');
+  const question = String(poll.question || '').slice(0, 300);
+  const caption = String(poll.caption || '').slice(0, 1000);
+  return { ...poll, question, caption, options, network, capability: cap, shareText: [caption, question, options.map((value,index)=>`${index+1}. ${value}`).join('\n'), tags].filter(Boolean).join('\n\n') };
 }
 
-export function inferPoll(instruction) {
+export function inferPoll(instruction, language = 'pt-BR') {
   const clean = instruction.trim();
   const afterColon = clean.includes(':') ? clean.split(':').slice(1).join(':') : '';
-  const candidates = afterColon.split(/,|\bou\b/i).map(v => v.trim().replace(/[.!?]+$/,'')).filter(Boolean).slice(0,10);
+  const candidates = afterColon.split(/,|\bou\b|\bor\b/i).map(v => v.trim().replace(/[.!?]+$/,'')).filter(Boolean).slice(0,10);
+  const english = language === 'en';
   return {
-    question: clean.split(':')[0].replace(/^(pergunte|crie uma enquete sobre)\s*/i,'').trim() || clean,
+    question: clean.split(':')[0].replace(/^(pergunte|crie uma enquete sobre|ask|create a poll about)\s*/i,'').trim() || clean,
     options: candidates.length >= 2 ? candidates : ['', ''],
-    caption: 'Sua opinião pode abrir novos caminhos. Participe da enquete.',
+    caption: english ? 'Your opinion can open new paths. Take part in the poll.' : 'Sua opinião pode abrir novos caminhos. Participe da enquete.',
     hashtags: [], duration: 7
   };
 }

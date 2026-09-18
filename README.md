@@ -4,7 +4,7 @@
 
 Polliniza é uma extensão livre para preparar uma enquete e adaptar suas versões para diferentes redes sociais. O projeto não promete uma automação inexistente: quando uma API oficial não permite criar enquetes, a extensão oferece publicação assistida ou conteúdo pronto para copiar.
 
-## O que a versão 0.1.0-alpha faz
+## O que a versão 0.1.0 faz
 
 - transforma uma instrução simples em um primeiro rascunho local;
 - permite editar pergunta, opções, legenda, duração e hashtags;
@@ -13,6 +13,8 @@ Polliniza é uma extensão livre para preparar uma enquete e adaptar suas versõ
 - mostra uma prévia antes de qualquer ação;
 - copia o conteúdo e abre o compositor da rede escolhida;
 - funciona sem servidor, conta própria ou chave de IA.
+- oferece a interface completa em português brasileiro e inglês;
+- preserva a escolha de idioma e o rascunho apenas no navegador.
 
 ## Instalação local
 
@@ -32,7 +34,7 @@ No Firefox, abra `about:debugging#/runtime/this-firefox`, escolha **Carregar ext
 | Assistida | Polliniza prepara o conteúdo e abre a rede para conclusão pelo usuário. |
 | Copiar e colar | Polliniza adapta e copia o texto; a enquete é montada manualmente. |
 
-Os dados de capacidade em `networks.js` são limites editoriais usados pelo protótipo e precisam ser revisados periodicamente conforme a documentação oficial das plataformas.
+Os dados de capacidade em `networks.js` são limites editoriais conservadores e precisam ser revisados periodicamente conforme a documentação oficial das plataformas.
 
 ## Privacidade
 
@@ -49,10 +51,9 @@ npm run build
 npm run package
 ```
 
-## Roteiro
+## Próximas versões
 
 - revisar capacidades com documentação oficial;
-- internacionalização português/inglês;
 - provedores opcionais Ollama e LM Studio;
 - OAuth e APIs oficiais onde permitido;
 - ícones finais e submissão às lojas;
