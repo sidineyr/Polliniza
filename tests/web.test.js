@@ -21,3 +21,13 @@ test('site local funciona sem configurar PUBLIC_ORIGIN',async()=>{
   } finally {server.close();}
 });
 test('origem HTTP pública é recusada',()=>assert.throws(()=>createPollinizaServer({env:{PUBLIC_ORIGIN:'http://example.org'}})));
+test('origem HTTPS do Render gera sitemap e libera páginas públicas',async()=>{
+  const server=createPollinizaServer({env:{RENDER_EXTERNAL_URL:'https://polliniza.onrender.com'}});server.listen(0,'127.0.0.1');await once(server,'listening');
+  try {const base=`http://127.0.0.1:${server.address().port}`;
+    const sitemap=await fetch(`${base}/sitemap.xml`);
+    assert.equal(sitemap.status,200);
+    assert.match(await sitemap.text(),/https:\/\/polliniza\.onrender\.com\/sobre/);
+    assert.match(await (await fetch(`${base}/robots.txt`)).text(),/Disallow: \/api\//);
+    assert.equal((await fetch(`${base}/privacidade`)).status,200);
+  } finally {server.close();}
+});

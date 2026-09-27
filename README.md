@@ -88,3 +88,7 @@ Cadastre as URLs de retorno `https://seu-dominio.example/api/callback/mastodon` 
 ### Executar e hospedar
 
 Para testar a interface localmente, `npm run web` basta: a origem padrão é `http://localhost:3000`. Para testar OAuth local, cadastre essa origem e os caminhos de retorno na plataforma. Fora de `localhost`, configure `PUBLIC_ORIGIN` com a URL HTTPS exata do site. O contêiner pode ser criado com `docker build -t polliniza .` e iniciado com `docker run --rm -p 3000:3000 -e PUBLIC_ORIGIN=https://seu-dominio.example ... polliniza`; injete as credenciais no ambiente do servidor, sem incluí-las na imagem. O caminho `/healthz` retorna um estado simples para monitoramento. Um serviço de hospedagem com Node e HTTPS é necessário: GitHub Pages, sozinho, não executa este servidor OAuth.
+
+### Hospedagem, busca e anúncios
+
+O arquivo `render.yaml` descreve um serviço Node no plano gratuito do Render. Vincule este repositório como Blueprint na sua conta Render; a URL HTTPS atribuída será lida de `RENDER_EXTERNAL_URL`. A publicação inicial não exige credenciais OAuth e oferece o editor e os destinos assistidos. Depois, configure os aplicativos e segredos OAuth **apenas no painel do servidor**. Uma instância gratuita pode suspender após inatividade, desconectando contas desta versão que mantém sessões em memória. Para indexação, o site expõe `/robots.txt` e `/sitemap.xml` na origem HTTPS. Consulte [o plano de hospedagem, indexação e AdSense](docs/INDEXACAO_ADSENSE.md). Nenhum anúncio é carregado nesta versão.

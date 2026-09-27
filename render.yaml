@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: polliniza
+    runtime: node
+    plan: free
+    branch: main
+    buildCommand: npm install --ignore-scripts
+    startCommand: npm run web
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_ENV
+        value: production
