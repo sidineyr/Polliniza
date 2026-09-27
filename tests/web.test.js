@@ -10,3 +10,14 @@ test('publicação Mastodon transmite poll e token ao host configurado',async()=
 test('SurveyMonkey cria pesquisa, pergunta e link',async()=>{const requests=[];const fetcher=async(url,init)=>{requests.push({url,body:JSON.parse(init.body)});return new Response(JSON.stringify({id:String(requests.length),url:requests.length===4?'https://www.surveymonkey.com/r/example':undefined}),{status:200});};const result=await publishPoll('surveymonkey',{},'secret',poll,fetcher);assert.equal(requests.length,4);assert.equal(requests[2].body.answers.choices[1].text,'Duas');assert.equal(requests[3].body.type,'weblink');assert.equal(result.id,'1');});
 test('servidor protege publicação e não expõe segredos na sessão',async()=>{const server=createPollinizaServer({env:{PUBLIC_ORIGIN:'http://127.0.0.1:3000',MASTODON_BASE_URL:'https://social.example',MASTODON_CLIENT_ID:'id',MASTODON_CLIENT_SECRET:'secret'}});server.listen(0,'127.0.0.1');await once(server,'listening');try{const base=`http://127.0.0.1:${server.address().port}`;const response=await fetch(`${base}/api/session`);const session=await response.json();assert.equal(session.available.mastodon,true);assert.equal(JSON.stringify(session).includes('secret'),false);const denied=await fetch(`${base}/api/publish`,{method:'POST',headers:{cookie:response.headers.get('set-cookie'),'content-type':'application/json'},body:JSON.stringify({poll,accountIds:['x']})});assert.equal(denied.status,403);}finally{server.close();}});
 test('Mastodon requer origem HTTPS fixa',()=>assert.throws(()=>providerConfig({MASTODON_BASE_URL:'http://localhost:8000'})));
+test('site local funciona sem configurar PUBLIC_ORIGIN',async()=>{
+  const server=createPollinizaServer({env:{}});server.listen(0,'127.0.0.1');await once(server,'listening');
+  try { const base=`http://127.0.0.1:${server.address().port}`;
+    assert.equal((await fetch(`${base}/healthz`)).status,200);
+    assert.equal((await fetch(base)).status,200);
+    const sessionResponse=await fetch(`${base}/api/session`);
+    const session=await sessionResponse.json();
+    assert.equal(session.available.mastodon,false);
+  } finally {server.close();}
+});
+test('origem HTTP pública é recusada',()=>assert.throws(()=>createPollinizaServer({env:{PUBLIC_ORIGIN:'http://example.org'}})));
