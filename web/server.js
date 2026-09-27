@@ -13,7 +13,7 @@ function respond(res, status, data, headers={}) { res.writeHead(status, { 'conte
 async function body(req) { let raw=''; for await (const chunk of req) { raw += chunk; if (raw.length > 16_384) throw new Error('Pedido muito grande.'); } return JSON.parse(raw || '{}'); }
 export function createPollinizaServer({ env=process.env, fetcher=fetch }={}) {
   const config = providerConfig(env);
-  const origin = new URL(env.PUBLIC_ORIGIN || `http://localhost:${env.PORT || 3000}`);
+  const origin = new URL(env.PUBLIC_ORIGIN || env.RENDER_EXTERNAL_URL || `http://localhost:${env.PORT || 3000}`);
   if (origin && (origin.pathname !== '/' || origin.search || origin.hash || !['http:','https:'].includes(origin.protocol))) throw new Error('PUBLIC_ORIGIN deve conter apenas origem HTTP(S).');
   if (origin.protocol !== 'https:' && !['localhost','127.0.0.1'].includes(origin.hostname)) throw new Error('PUBLIC_ORIGIN pública precisa usar HTTPS.');
   const sessions = new Map();
@@ -68,7 +68,16 @@ export function createPollinizaServer({ env=process.env, fetcher=fetch }={}) {
         return respond(res,404,{error:'Rota não encontrada.'});
       }
       if (url.pathname === '/healthz') return respond(res,200,{status:'ok'});
-      const assets={'/':'index.html','/index.html':'index.html','/app.js':'app.js','/style.css':'style.css','/core.js':'core.js'};
+      if (url.pathname === '/robots.txt') {
+        res.writeHead(200,{'content-type':'text/plain; charset=utf-8','cache-control':'public, max-age=3600'});
+        return res.end(origin.protocol === 'https:' ? `User-agent: *\nDisallow: /api/\nSitemap: ${origin.origin}/sitemap.xml\n` : 'User-agent: *\nDisallow: /\n');
+      }
+      if (url.pathname === '/sitemap.xml') {
+        if (origin.protocol !== 'https:') return respond(res,404,{error:'Disponível após publicação HTTPS.'});
+        res.writeHead(200,{'content-type':'application/xml; charset=utf-8','cache-control':'public, max-age=3600'});
+        return res.end(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${['/','/sobre','/privacidade'].map(path=>`<url><loc>${origin.origin}${path}</loc></url>`).join('')}</urlset>`);
+      }
+      const assets={'/':'index.html','/index.html':'index.html','/sobre':'about.html','/privacidade':'privacy.html','/app.js':'app.js','/style.css':'style.css','/core.js':'core.js'};
       const asset=assets[url.pathname]; if (!asset || req.method !== 'GET') return respond(res,404,{error:'Página não encontrada.'});
       const content=await readFile(join(here,asset));
       res.writeHead(200,{'content-type':asset.endsWith('.js')?'text/javascript; charset=utf-8':asset.endsWith('.css')?'text/css; charset=utf-8':'text/html; charset=utf-8','content-security-policy':"default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'",'referrer-policy':'no-referrer','x-content-type-options':'nosniff'});res.end(content);
