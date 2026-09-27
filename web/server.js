@@ -13,18 +13,18 @@ function respond(res, status, data, headers={}) { res.writeHead(status, { 'conte
 async function body(req) { let raw=''; for await (const chunk of req) { raw += chunk; if (raw.length > 16_384) throw new Error('Pedido muito grande.'); } return JSON.parse(raw || '{}'); }
 export function createPollinizaServer({ env=process.env, fetcher=fetch }={}) {
   const config = providerConfig(env);
-  const origin = env.PUBLIC_ORIGIN ? new URL(env.PUBLIC_ORIGIN) : null;
+  const origin = new URL(env.PUBLIC_ORIGIN || `http://localhost:${env.PORT || 3000}`);
   if (origin && (origin.pathname !== '/' || origin.search || origin.hash || !['http:','https:'].includes(origin.protocol))) throw new Error('PUBLIC_ORIGIN deve conter apenas origem HTTP(S).');
+  if (origin.protocol !== 'https:' && !['localhost','127.0.0.1'].includes(origin.hostname)) throw new Error('PUBLIC_ORIGIN pública precisa usar HTTPS.');
   const sessions = new Map();
   const server = createServer(async (req,res) => {
     try {
       const url = new URL(req.url, 'http://localhost');
       if (url.pathname.startsWith('/api/')) {
-        if (!origin && url.pathname !== '/api/session') return respond(res,503,{error:'Configure PUBLIC_ORIGIN para ativar conexões.'});
         const cookie = /(?:^|;\s*)polliniza=([^;]+)/.exec(req.headers.cookie||'')?.[1];
         let session = cookie && sessions.get(cookie);
         if (session && session.expires < Date.now()) { sessions.delete(cookie); session=null; }
-        if (!session) { const key=id(); session={key, csrf:id(), accounts:[], pending:null, expires:Date.now()+TTL}; sessions.set(key,session); res.setHeader('set-cookie',`polliniza=${key}; HttpOnly; SameSite=Lax; Path=/; Max-Age=43200${origin?.protocol === 'https:' ? '; Secure' : ''}`); }
+        if (!session) { for (const [key,value] of sessions) if (value.expires < Date.now()) sessions.delete(key); const key=id(); session={key, csrf:id(), accounts:[], pending:null, expires:Date.now()+TTL}; sessions.set(key,session); res.setHeader('set-cookie',`polliniza=${key}; HttpOnly; SameSite=Lax; Path=/; Max-Age=43200${origin.protocol === 'https:' ? '; Secure' : ''}`); }
         if (url.pathname === '/api/session' && req.method === 'GET') return respond(res,200,{csrf:session.csrf, accounts:session.accounts.map(({id,provider,label})=>({id,provider,label})), available:Object.fromEntries(Object.entries(config).map(([key,v])=>[key,!!v])), destinations:DESTINATIONS});
         const parts=url.pathname.split('/').filter(Boolean);
         if (parts[1] === 'connect' && parts.length === 3 && req.method === 'GET') {
@@ -51,7 +51,8 @@ export function createPollinizaServer({ env=process.env, fetcher=fetch }={}) {
           if (!origin || req.headers.origin !== origin.origin || !compare(req.headers['x-csrf-token'],session.csrf)) return respond(res,403,{error:'Sessão inválida. Atualize a página.'});
           if (url.pathname === '/api/disconnect') { const data=await body(req); session.accounts=session.accounts.filter(a=>a.id!==data.accountId); return respond(res,200,{ok:true}); }
           if (url.pathname === '/api/publish') {
-            const data=await body(req), poll=validatePoll(data.poll);
+            const data=await body(req); let poll;
+            try { poll=validatePoll(data.poll); } catch (error) { return respond(res,400,{error:error.message}); }
             const selected=Array.isArray(data.accountIds) ? [...new Set(data.accountIds)] : [];
             if (!selected.length || selected.length>10 || selected.some(x=>typeof x!=='string')) return respond(res,400,{error:'Selecione de 1 a 10 contas conectadas.'});
             const accounts=selected.map(x=>session.accounts.find(a=>a.id===x));
@@ -66,6 +67,7 @@ export function createPollinizaServer({ env=process.env, fetcher=fetch }={}) {
         }
         return respond(res,404,{error:'Rota não encontrada.'});
       }
+      if (url.pathname === '/healthz') return respond(res,200,{status:'ok'});
       const assets={'/':'index.html','/index.html':'index.html','/app.js':'app.js','/style.css':'style.css','/core.js':'core.js'};
       const asset=assets[url.pathname]; if (!asset || req.method !== 'GET') return respond(res,404,{error:'Página não encontrada.'});
       const content=await readFile(join(here,asset));
