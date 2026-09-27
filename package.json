@@ -9,8 +9,11 @@
     "lint": "node scripts/lint.js",
     "build": "node scripts/build.js",
     "package": "npm run build && node scripts/package.js",
-    "check": "npm run lint && npm test && npm run package"
+    "check": "npm run lint && npm test && npm run package",
+    "web": "node web/server.js"
   },
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "license": "AGPL-3.0-or-later"
 }

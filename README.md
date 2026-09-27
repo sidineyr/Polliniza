@@ -64,3 +64,23 @@ npm run package
 ## Licença
 
 AGPL-3.0-or-later. Idealizado por Sidiney Rodrigues e desenvolvido de forma aberta com auxílio de inteligência artificial.
+
+## Site de publicação (nova interface)
+
+O diretório `web/` contém um site e um servidor Node.js, independentes da extensão. Execute `npm run web` e acesse `http://localhost:3000`. A interface permite criar uma enquete, associar contas por OAuth, selecionar os destinos conectados e ver o resultado de cada publicação. Facebook, LinkedIn, Instagram, X, Reddit e Telegram aparecem como destinos assistidos: o texto é copiado, e a publicação é concluída pelo usuário na plataforma.
+
+Para habilitar publicação via API, registre seus próprios aplicativos nas plataformas e configure no servidor:
+
+```env
+PUBLIC_ORIGIN=https://seu-dominio.example
+MASTODON_BASE_URL=https://sua-instancia.example
+MASTODON_CLIENT_ID=...
+MASTODON_CLIENT_SECRET=...
+SURVEYMONKEY_CLIENT_ID=...
+SURVEYMONKEY_CLIENT_SECRET=...
+PORT=3000
+```
+
+Cadastre as URLs de retorno `https://seu-dominio.example/api/callback/mastodon` e `/api/callback/surveymonkey` nos respectivos aplicativos. Mastodon requer `read:accounts write:statuses`; SurveyMonkey requer `users_read surveys_write collectors_write`. A liberação de `surveys_write` para aplicativos públicos depende da aprovação do SurveyMonkey, e permissões/planos podem restringir coletores. O servidor deve estar atrás de HTTPS e receber a origem exata em `PUBLIC_ORIGIN`. Não coloque segredos em código, páginas estáticas ou extensões.
+
+**Escopo operacional:** as sessões e os tokens OAuth ficam somente na memória do processo e expiram em até 12 horas; uma reinicialização desconecta todas as contas. Esta versão serve como base funcional e demonstrável, ainda sem persistência, conta Polliniza própria, administração de usuários, filas ou hospedagem configurada. Enquetes já criadas no SurveyMonkey podem ficar parcialmente prontas se uma etapa posterior falhar; verifique o painel antes de repetir. A publicação em múltiplas contas não é uma transação: confirme cada resultado antes de reenviar para evitar duplicatas. O site não solicita senhas das plataformas.
