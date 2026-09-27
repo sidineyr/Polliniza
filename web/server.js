@@ -13,7 +13,7 @@ function respond(res, status, data, headers={}) { res.writeHead(status, { 'conte
 async function body(req) { let raw=''; for await (const chunk of req) { raw += chunk; if (raw.length > 16_384) throw new Error('Pedido muito grande.'); } return JSON.parse(raw || '{}'); }
 export function createPollinizaServer({ env=process.env, fetcher=fetch }={}) {
   const config = providerConfig(env);
-  const origin = new URL(env.PUBLIC_ORIGIN || env.RENDER_EXTERNAL_URL || `http://localhost:${env.PORT || 3000}`);
+  const origin = new URL(env.PUBLIC_ORIGIN || env.RENDER_EXTERNAL_URL || (env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${env.VERCEL_PROJECT_PRODUCTION_URL}` : `http://localhost:${env.PORT || 3000}`));
   if (origin && (origin.pathname !== '/' || origin.search || origin.hash || !['http:','https:'].includes(origin.protocol))) throw new Error('PUBLIC_ORIGIN deve conter apenas origem HTTP(S).');
   if (origin.protocol !== 'https:' && !['localhost','127.0.0.1'].includes(origin.hostname)) throw new Error('PUBLIC_ORIGIN pública precisa usar HTTPS.');
   const sessions = new Map();

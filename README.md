@@ -92,3 +92,7 @@ Para testar a interface localmente, `npm run web` basta: a origem padrão é `ht
 ### Hospedagem, busca e anúncios
 
 O arquivo `render.yaml` descreve um serviço Node no plano gratuito do Render. Vincule este repositório como Blueprint na sua conta Render; a URL HTTPS atribuída será lida de `RENDER_EXTERNAL_URL`. A publicação inicial não exige credenciais OAuth e oferece o editor e os destinos assistidos. Depois, configure os aplicativos e segredos OAuth **apenas no painel do servidor**. Uma instância gratuita pode suspender após inatividade, desconectando contas desta versão que mantém sessões em memória. Para indexação, o site expõe `/robots.txt` e `/sitemap.xml` na origem HTTPS. Consulte [o plano de hospedagem, indexação e AdSense](docs/INDEXACAO_ADSENSE.md). Nenhum anúncio é carregado nesta versão.
+
+### Alternativa de hospedagem sem cartão
+
+O arquivo `server.js` na raiz permite importar o repositório no Vercel como um projeto Node, no plano Hobby. O projeto deve servir o servidor como função Node e incluir os arquivos `web/**` na função (`vercel.json`). A origem HTTPS de produção é lida de `VERCEL_PROJECT_PRODUCTION_URL`; para um domínio próprio, configure `PUBLIC_ORIGIN`. O Vercel pode encerrar ou replicar instâncias da função, portanto as contas OAuth guardadas em memória não são confiáveis nesse ambiente. Ative os conectores com usuários reais somente depois de migrar as sessões para armazenamento persistente. A versão pública sem credenciais mantém criação de enquete e publicação assistida.

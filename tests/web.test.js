@@ -31,3 +31,7 @@ test('origem HTTPS do Render gera sitemap e libera páginas públicas',async()=>
     assert.equal((await fetch(`${base}/privacidade`)).status,200);
   } finally {server.close();}
 });
+test('origem de produção do Vercel gera sitemap HTTPS',async()=>{
+  const server=createPollinizaServer({env:{VERCEL_PROJECT_PRODUCTION_URL:'polliniza.vercel.app'}});server.listen(0,'127.0.0.1');await once(server,'listening');
+  try {const sitemap=await fetch(`http://127.0.0.1:${server.address().port}/sitemap.xml`);assert.match(await sitemap.text(),/https:\/\/polliniza\.vercel\.app\/privacidade/);}finally{server.close();}
+});
