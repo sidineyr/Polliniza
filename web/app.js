@@ -1,6 +1,7 @@
 import { validatePoll, shareText } from './core.js';
 const $=s=>document.querySelector(s);
 let session;
+let pendingPublication;
 const form=$('#poll-form'), results=$('#results');
 function pollDraft(){return {question:$('#question').value, options:[...$('#options input')].map(e=>e.value),days:Number($('#days').value)};}
 function element(tag,text,cls){const n=document.createElement(tag);n.textContent=text;if(cls)n.className=cls;return n;}
@@ -17,5 +18,8 @@ async function refresh(){const response=await fetch('/api/session');session=awai
  }
  const assisted=$('#assisted');assisted.replaceChildren();for(const [key,item] of Object.entries(session.destinations)){if(item.kind!=='assisted')continue;const row=element('div','', 'destination'),info=document.createElement('div');info.append(element('strong',item.label),element('small','Publicação assistida'));const copy=element('button','Copiar e abrir');copy.type='button';copy.addEventListener('click',async()=>{try{const poll=validatePoll(pollDraft());await navigator.clipboard.writeText(shareText(poll));window.open(item.url,'_blank','noopener,noreferrer');message(`Enquete copiada. Conclua a publicação no ${item.label}.`);}catch(e){message(e.message)}});row.append(info,copy);assisted.append(row);}
 }
-form.addEventListener('submit',async event=>{event.preventDefault();try{const poll=validatePoll(pollDraft());const accountIds=[...document.querySelectorAll('input[name="account"]:checked')].map(n=>n.value);if(!accountIds.length)throw Error('Selecione ao menos uma conta conectada.');const button=form.querySelector('.primary');button.disabled=true;message('Publicando…');try{const response=await api('/api/publish',{poll,accountIds});results.replaceChildren();for(const result of response.results){const name=session.accounts.find(a=>a.id===result.accountId)?.label||result.provider;const line=element('p',`${name}: ${result.ok?'Publicado':'Falha — '+result.error}`);if(result.url){const a=element('a',' Abrir enquete');a.href=result.url;a.target='_blank';a.rel='noopener noreferrer';line.append(a);}results.append(line);}}finally{button.disabled=false;}}catch(e){message(e.message)}});
+form.addEventListener('submit',async event=>{event.preventDefault();try{const poll=validatePoll(pollDraft());const accountIds=[...document.querySelectorAll('input[name="account"]:checked')].map(n=>n.value);if(!accountIds.length)throw Error('Selecione ao menos uma conta conectada.');const button=form.querySelector('.primary');button.disabled=true;message('Publicando…');try{const signature=JSON.stringify({poll,accountIds});
+if (!pendingPublication || pendingPublication.signature!==signature) pendingPublication={signature,id:crypto.randomUUID()};
+const response=await api('/api/publish',{poll,accountIds,operationId:pendingPublication.id});results.replaceChildren();for(const result of response.results){const name=session.accounts.find(a=>a.id===result.accountId)?.label||result.provider;const line=element('p',`${name}: ${result.ok?'Publicado':'Falha — '+result.error}${result.progress?.surveyId?' (pesquisa '+result.progress.surveyId+')':''}`);if(result.url){const a=element('a',' Abrir enquete');a.href=result.url;a.target='_blank';a.rel='noopener noreferrer';line.append(a);}results.append(line);}}finally{button.disabled=false;}}catch(e){message(e.message)}});
 refresh().catch(e=>message(e.message));preview();
+
