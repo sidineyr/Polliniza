@@ -1,98 +1,99 @@
 # Polliniza
 
-**Crie uma vez. Adapte com inteligência. Publique com controle.**
+[English](README.en.md) · [Português](README.md)
 
-Polliniza é uma extensão livre para preparar uma enquete e adaptar suas versões para diferentes redes sociais. O projeto não promete uma automação inexistente: quando uma API oficial não permite criar enquetes, a extensão oferece publicação assistida ou conteúdo pronto para copiar.
+**Crie uma enquete. Revise os destinos. Publique com controle.**
 
-## O que a versão 0.1.0 faz
+Ferramenta livre para preparar enquetes e concluir sua publicação por APIs oficiais ou por fluxo assistido. Há dois aplicativos independentes: uma extensão local e um site com servidor Node. Não há integração universal, login automático nas redes ou publicação programática onde a plataforma não a permite.
 
-- transforma uma instrução simples em um primeiro rascunho local;
-- permite editar pergunta, opções, legenda, duração e hashtags;
-- salva o rascunho no navegador;
-- adapta quantidade e tamanho das opções por rede;
-- mostra uma prévia antes de qualquer ação;
-- copia o conteúdo e abre o compositor da rede escolhida;
-- funciona sem servidor, conta própria ou chave de IA;
-- oferece a interface completa em português brasileiro e inglês;
-- preserva a escolha de idioma e o rascunho apenas no navegador.
+## Estado verificável
 
-## Instalação local
+Esta documentação acompanha a `main` com os PRs [#1](https://github.com/sidineyr/Polliniza/pull/1), [#2](https://github.com/sidineyr/Polliniza/pull/2), [#3](https://github.com/sidineyr/Polliniza/pull/3) e [#4](https://github.com/sidineyr/Polliniza/pull/4), integrados em 27/09/2026. O [PR técnico #5](https://github.com/sidineyr/Polliniza/pull/5) propõe sessões persistentes cifradas e proteção de reenvios; ainda não faz parte desta base. Não há URL de produção nem teste OAuth com contas reais comprovados nesta revisão.
 
-Baixe o pacote pronto [polliniza-v0.1.0.zip](packages/polliniza-v0.1.0.zip), descompacte-o e carregue a pasta no navegador.
+| Produto | Implementado | Limite atual |
+|---|---|---|
+| Extensão 0.1.0 | Rascunho local, adaptação por destino, prévia, copiar e abrir | Todos os destinos são assistidos ou manuais; não usa OAuth |
+| Site | Editor, seleção de contas, OAuth e conectores Mastodon/SurveyMonkey | Sessões e tokens em memória; requer configuração externa; não liberar OAuth público contínuo |
+| Publicação | Arquivos Render/Vercel, health check, robots e sitemap | Arquivos preparados não comprovam deploy, indexação ou anúncios |
 
-```bash
+## Site
+
+Requer Node.js 20 ou superior. Não há dependências de produção nesta base.
+
+```sh
+npm run web
+```
+
+Abra `http://localhost:3000`. Sem credenciais, use o editor e a publicação assistida. O site está em **português brasileiro**; não possui seletor inglês.
+
+| Destino web | Código implementado | Configuração e validação |
+|---|---|---|
+| Mastodon | OAuth, leitura de perfil e criação de status com enquete | Uma instância HTTPS configurada; registrar app e testar com conta autorizada |
+| SurveyMonkey | OAuth, perfil, criação de pesquisa, página, pergunta e coletor weblink | Credenciais, escopos/aprovação e conta compatível; teste real pendente |
+| Facebook, LinkedIn, Instagram, X, Reddit, Telegram | Copiar texto e abrir a plataforma | O usuário monta/conclui a publicação; não conecta contas por API |
+
+Os conectores estão implementados, mas não foram comprovados como configurados ou testados em produção. SurveyMonkey pode exigir aprovação de escopos e planos compatíveis. Não extrapole a disponibilidade de enquetes nativas dos destinos assistidos.
+
+### Variáveis de ambiente
+
+| Variável | Uso |
+|---|---|
+| `PORT` | Porta Node; padrão `3000` |
+| `PUBLIC_ORIGIN` | Origem exata, sem caminho; HTTPS fora de localhost; prevalece sobre origem da hospedagem |
+| `RENDER_EXTERNAL_URL` | Origem HTTPS fornecida pelo Render |
+| `VERCEL_PROJECT_PRODUCTION_URL` | Host de produção fornecido pelo Vercel; o servidor acrescenta HTTPS |
+| `MASTODON_BASE_URL` | Origem HTTPS da instância Mastodon |
+| `MASTODON_CLIENT_ID`, `MASTODON_CLIENT_SECRET` | Aplicativo Mastodon, escopos `read:accounts write:statuses` |
+| `SURVEYMONKEY_CLIENT_ID`, `SURVEYMONKEY_CLIENT_SECRET` | Aplicativo SurveyMonkey, escopos `users_read surveys_write collectors_write` |
+
+Guarde segredos exclusivamente no ambiente do servidor. Não os publique em arquivos, imagens Docker, extensão ou issues. Cadastre os callbacks na origem definitiva: `/api/callback/mastodon` e `/api/callback/surveymonkey`. A simples presença de credenciais torna um conector disponível nesta base; não constitui liberação segura para terceiros.
+
+### Limites web
+
+Pergunta até 200 caracteres, 2–4 opções de até 50 caracteres, duração inteira de 1–7 dias e até 10 contas por pedido. Sessões têm prazo de até 12 horas; reinício ou outra instância pode perder tokens, estado OAuth e CSRF. A limpeza de entradas vencidas ocorre em acessos à API, sem job periódico. Não há armazenamento persistente, conta Polliniza própria, fila ou idempotência de publicação nesta base. SurveyMonkey pode deixar recursos parciais; repetir pode criar duplicatas. Confira a plataforma antes de reenviar.
+
+Cookies são HttpOnly e SameSite=Lax, com Secure quando a origem é HTTPS. POST exige origem exata e token CSRF. Essas proteções não resolvem persistência nem todos os riscos de produção. Consulte [segurança](SECURITY.md), [privacidade](PRIVACY.md) e [checklist de liberação](docs/EXTERNAL_CHECKLIST.md).
+
+## Extensão
+
+A extensão prepara rascunhos por regras locais, sem chave de IA, servidor ou senha de rede. A tela principal possui **PT-BR/EN**, com idioma e rascunho salvos em `chrome.storage.local`; popup e metadados do manifesto permanecem em português. Não há publicação por API na extensão.
+
+```sh
 npm run check
 ```
 
-No Chrome, Edge ou Brave, abra `chrome://extensions`, ative o modo de desenvolvedor, escolha **Carregar sem compactação** e selecione a pasta `dist`.
+Para Chrome/Edge/Brave: abra a página de extensões, ative modo de desenvolvedor e carregue a pasta `dist` sem compactação. Para obter o pacote preparado, use `artifacts/polliniza-v0.1.0.zip` após o comando. Os ZIPs históricos em `packages/` não representam o site nem uma release nova.
 
-No Firefox, abra `about:debugging#/runtime/this-firefox`, escolha **Carregar extensão temporária** e selecione `dist/manifest.json`.
+O manifesto atual é MV3 com `background.service_worker`. A presença de um bloco Gecko não comprova suporte Firefox: este pacote não inclui um manifesto específico validado nesse navegador. Trate Firefox como compatibilidade pendente, sem recomendar o mesmo ZIP como instalação confirmada. Não há publicação comprovada nas lojas de extensões.
 
-## Modos de integração
+Destinos editoriais da extensão: LinkedIn, X, Facebook, Instagram, Threads, Bluesky, Mastodon, Reddit, Substack e Telegram. Os limites em `networks.js` são regras editoriais do aplicativo, não garantias atualizadas de capacidade das plataformas. Revise a prévia e a disponibilidade na conta de destino.
 
-| Modo | Significado |
+## Arquitetura e desenvolvimento
+
+| Caminho | Responsabilidade |
 |---|---|
-| API oficial | A plataforma autoriza publicação programática. Ainda não habilitado nesta versão. |
-| Assistida | Polliniza prepara o conteúdo e abre a rede para conclusão pelo usuário. |
-| Copiar e colar | Polliniza adapta e copia o texto; a enquete é montada manualmente. |
+| `app.*`, `networks.js`, `manifest.json` | Extensão, regras editoriais e armazenamento local |
+| `web/core.js`, `web/app.js` | Validação compartilhada do site e interface |
+| `web/providers.js` | OAuth e APIs externas no servidor |
+| `web/server.js` | Sessões, CSRF, API e páginas públicas |
+| `server.js`, `vercel.json`, `render.yaml`, `Dockerfile` | Entradas e preparação de hospedagem |
+| `scripts/`, `tests/`, `.github/workflows/ci.yml` | Build, empacotamento e CI |
 
-Os dados de capacidade em `networks.js` são limites editoriais conservadores e precisam ser revisados periodicamente conforme a documentação oficial das plataformas.
-
-## Privacidade
-
-O rascunho permanece em `chrome.storage.local`. A extensão não lê senhas, histórico ou páginas, não injeta scripts em redes sociais e não possui telemetria. Veja [PRIVACY.md](PRIVACY.md) e [SECURITY.md](SECURITY.md).
-
-## Desenvolvimento
-
-Requer Node.js 20 ou superior e não possui dependências de produção.
-
-```bash
+```sh
 npm test
 npm run lint
 npm run build
 npm run package
 ```
 
-## Próximas versões
+O CI testa lógica com mocks e gera um artefato da extensão. O lint desta base verifica apenas quatro arquivos da extensão; não é auditoria integral do servidor. Testes aprovados não comprovam OAuth real, compatibilidade de todos os navegadores ou implantação. O empacotamento preparado neste PR usa arquivos ordenados e metadados ZIP fixos, sem dependências adicionais; veja [release reproduzível](docs/RELEASE.md).
 
-- revisar capacidades com documentação oficial;
-- provedores opcionais Ollama e LM Studio;
-- OAuth e APIs oficiais onde permitido;
-- ícones finais e submissão às lojas;
-- testes de interface com leitores de tela.
+GitHub Pages pode servir arquivos estáticos, mas não executa este servidor OAuth. Veja [Vercel/Render, indexação e AdSense](docs/INDEXACAO_ADSENSE.md). Não há anúncio, ID de editor, aprovação AdSense ou resultado de indexação comprovado.
 
-## Licença
+## Documentação e licença
 
-AGPL-3.0-or-later. Idealizado por Sidiney Rodrigues e desenvolvido de forma aberta com auxílio de inteligência artificial.
+[Changelog](CHANGELOG.md) · [Contribuição](CONTRIBUTING.md) · [Código de conduta](CODE_OF_CONDUCT.md) · [Metadados GitHub](docs/GITHUB_METADATA.md)
 
-## Site de publicação (nova interface)
+Copyright © 2026 Sidiney Rodrigues. Código licenciado sob **AGPL-3.0-or-later**; texto integral em [LICENSE](LICENSE), identificação em [NOTICE](NOTICE). Idealizado por Sidiney Rodrigues, com auxílio de inteligência artificial.
 
-O diretório `web/` contém um site e um servidor Node.js, independentes da extensão. Execute `npm run web` e acesse `http://localhost:3000`. A interface permite criar uma enquete, associar contas por OAuth, selecionar os destinos conectados e ver o resultado de cada publicação. Facebook, LinkedIn, Instagram, X, Reddit e Telegram aparecem como destinos assistidos: o texto é copiado, e a publicação é concluída pelo usuário na plataforma.
-
-Para habilitar publicação via API, registre seus próprios aplicativos nas plataformas e configure no servidor:
-
-```env
-PUBLIC_ORIGIN=https://seu-dominio.example
-MASTODON_BASE_URL=https://sua-instancia.example
-MASTODON_CLIENT_ID=...
-MASTODON_CLIENT_SECRET=...
-SURVEYMONKEY_CLIENT_ID=...
-SURVEYMONKEY_CLIENT_SECRET=...
-PORT=3000
-```
-
-Cadastre as URLs de retorno `https://seu-dominio.example/api/callback/mastodon` e `/api/callback/surveymonkey` nos respectivos aplicativos. Mastodon requer `read:accounts write:statuses`; SurveyMonkey requer `users_read surveys_write collectors_write`. A liberação de `surveys_write` para aplicativos públicos depende da aprovação do SurveyMonkey, e permissões/planos podem restringir coletores. O servidor deve estar atrás de HTTPS e receber a origem exata em `PUBLIC_ORIGIN`. Não coloque segredos em código, páginas estáticas ou extensões.
-
-**Escopo operacional:** as sessões e os tokens OAuth ficam somente na memória do processo e expiram em até 12 horas; uma reinicialização desconecta todas as contas. Esta versão serve como base funcional e demonstrável, ainda sem persistência, conta Polliniza própria, administração de usuários, filas ou hospedagem configurada. Enquetes já criadas no SurveyMonkey podem ficar parcialmente prontas se uma etapa posterior falhar; verifique o painel antes de repetir. A publicação em múltiplas contas não é uma transação: confirme cada resultado antes de reenviar para evitar duplicatas. O site não solicita senhas das plataformas.
-
-### Executar e hospedar
-
-Para testar a interface localmente, `npm run web` basta: a origem padrão é `http://localhost:3000`. Para testar OAuth local, cadastre essa origem e os caminhos de retorno na plataforma. Fora de `localhost`, configure `PUBLIC_ORIGIN` com a URL HTTPS exata do site. O contêiner pode ser criado com `docker build -t polliniza .` e iniciado com `docker run --rm -p 3000:3000 -e PUBLIC_ORIGIN=https://seu-dominio.example ... polliniza`; injete as credenciais no ambiente do servidor, sem incluí-las na imagem. O caminho `/healthz` retorna um estado simples para monitoramento. Um serviço de hospedagem com Node e HTTPS é necessário: GitHub Pages, sozinho, não executa este servidor OAuth.
-
-### Hospedagem, busca e anúncios
-
-O arquivo `render.yaml` descreve um serviço Node no plano gratuito do Render. Vincule este repositório como Blueprint na sua conta Render; a URL HTTPS atribuída será lida de `RENDER_EXTERNAL_URL`. A publicação inicial não exige credenciais OAuth e oferece o editor e os destinos assistidos. Depois, configure os aplicativos e segredos OAuth **apenas no painel do servidor**. Uma instância gratuita pode suspender após inatividade, desconectando contas desta versão que mantém sessões em memória. Para indexação, o site expõe `/robots.txt` e `/sitemap.xml` na origem HTTPS. Consulte [o plano de hospedagem, indexação e AdSense](docs/INDEXACAO_ADSENSE.md). Nenhum anúncio é carregado nesta versão.
-
-### Alternativa de hospedagem sem cartão
-
-O arquivo `server.js` na raiz permite importar o repositório no Vercel como um projeto Node, no plano Hobby. O projeto deve servir o servidor como função Node e incluir os arquivos `web/**` na função (`vercel.json`). A origem HTTPS de produção é lida de `VERCEL_PROJECT_PRODUCTION_URL`; para um domínio próprio, configure `PUBLIC_ORIGIN`. O Vercel pode encerrar ou replicar instâncias da função, portanto as contas OAuth guardadas em memória não são confiáveis nesse ambiente. Ative os conectores com usuários reais somente depois de migrar as sessões para armazenamento persistente. A versão pública sem credenciais mantém criação de enquete e publicação assistida.
+[Mozilla: background manifest support](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/background)

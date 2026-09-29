@@ -1,3 +1,5 @@
 # Polliniza em português brasileiro
 
-A documentação principal já está em português brasileiro. Consulte o [README](README.md) para instalar, testar e contribuir. A versão estável 0.1.0 também oferece seletor PT/EN dentro da extensão.
+A documentação completa em português está no [README.md](README.md). A versão equivalente em inglês está em [README.en.md](README.en.md).
+
+O editor principal da extensão tem seletor PT-BR/EN. O site, o popup e os metadados do manifesto permanecem em português. Documentação traduzida não significa interface web traduzida.
