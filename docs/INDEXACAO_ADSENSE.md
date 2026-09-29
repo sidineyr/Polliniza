@@ -2,7 +2,7 @@
 
 ## 1. Hospedagem
 
-O repositório inclui `render.yaml` para um serviço Node no plano gratuito Render. Conecte o repositório `sidineyr/Polliniza` ao Render como Blueprint, confira que o serviço usa `main` e que `/healthz` responde. O Render atribui `RENDER_EXTERNAL_URL`, que o servidor usa como origem HTTPS por padrão. Atribua `PUBLIC_ORIGIN` somente se escolher um domínio próprio e atualize os retornos OAuth cadastrados. Configure os segredos OAuth no painel da hospedagem; nunca no GitHub. Antes de ativar publicação real para terceiros, migre sessões e tokens para armazenamento persistente e protegido: o plano gratuito suspende serviços inativos e perde as sessões em memória.
+O repositório inclui `render.yaml` para um serviço Node no plano gratuito Render. Conecte o repositório `sidineyr/Polliniza` ao Render como Blueprint, confira que o serviço usa `main` e que `/healthz` responde. O Render atribui `RENDER_EXTERNAL_URL`, que o servidor usa como origem HTTPS por padrão. Atribua `PUBLIC_ORIGIN` somente se escolher um domínio próprio e atualize os retornos OAuth cadastrados. Configure os segredos OAuth no painel da hospedagem; nunca no GitHub. Antes de ativar publicação real para terceiros, configure o armazenamento persistente e criptografado descrito em [SESSIONS_SECURITY.md](SESSIONS_SECURITY.md): o plano gratuito suspende serviços inativos e perde as sessões em memória.
 
 ## 2. Indexação
 
@@ -19,4 +19,5 @@ No painel da conta real do AdSense, adicione o domínio e obtenha o identificado
 
 ## Alternativa sem cartão: Vercel
 
-Importe o repositório público como projeto no plano Hobby e verifique que a branch de produção é `main`. A entrada Node `server.js` inicia o mesmo servidor; `VERCEL_PROJECT_PRODUCTION_URL` fornece a origem HTTPS para sitemap e robots. Não configure os segredos OAuth antes de resolver o armazenamento persistente de sessão, pois funções podem reiniciar entre autorização e publicação. Os passos de indexação e AdSense acima valem para a URL final verificada.
+Importe o repositório público como projeto no plano Hobby e verifique que a branch de produção é `main`. A entrada Node `server.js` inicia o mesmo servidor; `VERCEL_PROJECT_PRODUCTION_URL` fornece a origem HTTPS para sitemap e robots. Configure [armazenamento durável e criptografia](SESSIONS_SECURITY.md) antes dos segredos OAuth, pois funções podem reiniciar entre autorização e publicação. Os passos de indexação e AdSense acima valem para a URL final verificada.
+
